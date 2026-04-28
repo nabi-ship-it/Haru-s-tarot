@@ -17,27 +17,28 @@
             align-items: center; 
             min-height: 100vh;
             overflow-x: hidden;
-            background-image: linear-gradient(to bottom, rgba(10, 10, 18, 0.8), rgba(10, 10, 18, 0.8)), url('https://img.nga.178.com/attachments/mon_202306/19/-9lddQ18o-bh0iZgT3cSsg-sg.jpg');
+            /* 背景圖設定 */
+            background-image: linear-gradient(to bottom, rgba(10, 10, 18, 0.7), rgba(10, 10, 18, 0.8)), url('6602.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
         
-        .header-section { margin-top: 20px; margin-bottom: 10px; text-align: center; width: 100%; }
-        h1 { color: var(--gold); font-size: 1.6rem; margin: 10px 0; }
-        .instruction-text { font-size: 0.95rem; color: #eee; margin: 5px 0; line-height: 1.5; font-weight: bold; padding: 0 20px; }
+        .header-section { margin-top: 30px; margin-bottom: 10px; text-align: center; width: 100%; }
+        h1 { color: var(--gold); font-size: 1.8rem; margin: 10px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+        .instruction-text { font-size: 1rem; color: #fff; margin: 5px 0; line-height: 1.5; font-weight: bold; padding: 0 20px; text-shadow: 0 2px 5px rgba(0,0,0,0.9); }
 
-        .control-panel { width: 100%; max-width: 400px; margin-bottom: 15px; text-align: center; padding: 0 10px; }
+        .control-panel { width: 100%; max-width: 400px; margin-bottom: 20px; text-align: center; padding: 0 15px; }
         select { 
             width: 100%; 
-            background: rgba(26, 26, 46, 0.8);
+            background: rgba(26, 26, 46, 0.85);
             color: white; 
             border: 1px solid var(--gold); 
             padding: 12px; 
             border-radius: 10px; 
             font-size: 1rem;
             appearance: none;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
         }
 
         /* 三排橫向滑動佈局 */
@@ -45,17 +46,17 @@
             width: 100vw;
             overflow-x: auto;
             display: grid;
-            grid-template-rows: repeat(3, 130px); 
+            grid-template-rows: repeat(3, 135px); 
             grid-auto-flow: column;
-            gap: 12px;
+            gap: 15px;
             padding: 20px;
             -webkit-overflow-scrolling: touch;
         }
         .deck-container::-webkit-scrollbar { display: none; }
 
         .tarot-card { 
-            width: 80px; 
-            height: 120px; 
+            width: 85px; 
+            height: 125px; 
             background: linear-gradient(135deg, rgba(26, 26, 46, 0.9) 0%, rgba(22, 33, 62, 0.9) 100%);
             border: 1.5px solid var(--gold); 
             border-radius: 8px;
@@ -63,57 +64,60 @@
             align-items: center;
             justify-content: center;
             font-size: 0.7rem;
-            color: rgba(212, 175, 55, 0.4);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            color: rgba(212, 175, 55, 0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
             transition: transform 0.2s;
             user-select: none;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(3px);
         }
         .tarot-card:active { transform: scale(0.9); }
-        .tarot-card.selected { opacity: 0.15; transform: scale(0.8); pointer-events: none; border-color: #444; }
+        .tarot-card.selected { opacity: 0.1; transform: scale(0.8); pointer-events: none; border-color: #444; }
 
-        /* 結果顯示 */
-        .result-list { width: 100%; max-width: 400px; margin-top: 10px; padding: 10px; }
+        /* 結果顯示區 */
+        .result-list { width: 100%; max-width: 400px; margin-top: 10px; padding: 15px; }
         .result-item { 
-            background: rgba(22, 33, 62, 0.75); 
-            border-left: 4px solid var(--gold); 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 12px; 
-            animation: slideUp 0.4s ease-out;
-            backdrop-filter: blur(5px);
+            background: rgba(22, 33, 62, 0.8); 
+            border-left: 5px solid var(--gold); 
+            padding: 18px; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+            animation: slideUp 0.5s ease-out;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         
-        .pos-name { color: var(--gold); font-size: 0.8rem; font-weight: bold; }
-        .card-title { font-size: 1.1rem; font-weight: bold; margin: 5px 0; display: block; color: white; }
-        .card-desc { font-size: 0.9rem; color: #ddd; line-height: 1.5; }
+        .pos-name { color: var(--gold); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .card-title { font-size: 1.2rem; font-weight: bold; margin: 8px 0; display: block; color: #fff; }
+        .card-desc { font-size: 0.95rem; color: #eee; line-height: 1.6; }
 
-        /* 最後顯示的那段話 */
-        .contact-hint {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px dashed var(--gold);
-            background: rgba(212, 175, 55, 0.1);
-            border-radius: 10px;
+        /* 底部聯繫區 - 更新文字內容 */
+        .info-footer {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(10, 10, 18, 0.75);
+            border: 1.5px solid var(--gold);
+            border-radius: 15px;
             text-align: center;
-            color: var(--gold);
-            font-weight: bold;
-            font-size: 1.1rem;
-            animation: fadeIn 1s ease-in;
+            backdrop-filter: blur(15px);
+            width: 90%;
+            max-width: 380px;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .info-title { color: var(--gold); font-weight: bold; font-size: 1.2rem; margin-bottom: 10px; }
+        .info-text { font-size: 1rem; color: #fff; line-height: 1.8; font-weight: 500; }
 
         .main-btn { 
             background: var(--gold); 
             color: #000; 
             border: none; 
-            padding: 14px 40px; 
-            border-radius: 30px; 
+            padding: 15px 45px; 
+            border-radius: 35px; 
             font-weight: bold; 
             font-size: 1.1rem;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+            margin-bottom: 50px;
+            transition: 0.3s;
         }
     </style>
 </head>
@@ -132,24 +136,31 @@
         <option value="6">六張牌陣 (問題核心與全面解析)</option>
         <option value="7">七張牌陣 (脈輪與完整週運勢)</option>
     </select>
-    <div style="margin-top: 30px;">
+    <div style="margin-top: 35px;">
         <button class="main-btn" onclick="handleShuffle()">開始洗牌</button>
     </div>
 </div>
 
 <div id="game-view" style="display:none; width: 100%;">
-    <p style="text-align:center; font-size: 0.9rem; color: #eee; font-weight: bold; margin-bottom: 5px;">左右滑動牌組，挑選 <span id="need-count" style="color:var(--gold); font-weight:bold;"></span> 張牌</p>
+    <p style="text-align:center; font-size: 0.95rem; color: #fff; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 4px #000;">👈 左右滑動牌組，挑選 <span id="need-count" style="color:var(--gold);"></span> 張牌 👉</p>
     <div class="deck-container" id="deck-display"></div>
 </div>
 
 <div id="result-display" class="result-list"></div>
 
-<div id="footer-action" style="display:none; margin-bottom: 50px; text-align: center;">
-    <div class="contact-hint">✨ 詳細解牌內容找 Haru ✨</div>
+<div id="footer-action" style="display:none; flex-direction: column; align-items: center; width: 100%;">
+    <div class="info-footer">
+        <div class="info-title">✨ 詳細解牌內容找 Haru ✨</div>
+        <div class="info-text">
+            詳細解牌需下單<br>
+            付款方式：轉帳 / 街口支付
+        </div>
+    </div>
     <button class="main-btn" onclick="location.reload()">重新占卜</button>
 </div>
 
 <script>
+    // 塔羅牌完整數據與邏輯
     const tarotData = [
         { n: "0 愚者", m: "新的冒險與開始，保持純真與勇氣。" },
         { n: "I 魔術師", m: "展現才華，萬事具備，發揮創意。" },
@@ -183,8 +194,8 @@
 
     const posConfig = {
         "1": ["神聖指引"],
-        "3": ["過去 (Past)", "現在 (Present)", "未來 (Future)"],
-        "4": ["風之元素 (思考)", "火之元素 (行動)", "水之元素 (情感)", "土之元素 (物質)"],
+        "3": ["過去", "現在", "未來"],
+        "4": ["風之元素", "火之元素", "水之元素", "土之元素"],
         "6": ["現狀核心", "外在干擾", "潛在機會", "過去基礎", "他人觀點", "最終導向"],
         "7": ["週一", "週二", "週三", "週四", "週五", "週六", "週日"]
     };
@@ -226,7 +237,7 @@
                     if(pickedNum === pickGoal) {
                         document.getElementById('game-view').style.display = 'none';
                         document.getElementById('status-text').innerText = "占卜完成";
-                        document.getElementById('footer-action').style.display = 'block';
+                        document.getElementById('footer-action').style.display = 'flex';
                     }
                 }
             };
