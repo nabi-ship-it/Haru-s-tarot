@@ -2,451 +2,239 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Haru 的專業占卜室</title>
     <style>
-        :root { --gold: #d4af37; --dark-blue: #1a1a2e; }
-        body { font-family: 'PingFang TC', sans-serif; background: #0f0f1a; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
-        .container { width: 100%; max-width: 600px; text-align: center; padding: 20px; }
-        
-        /* 選單樣式 */
-        select { background: #252545; color: white; border: 1px solid var(--gold); padding: 10px; border-radius: 8px; margin-bottom: 20px; width: 80%; }
-
-        /* 牌組滑動區域 */
-        .deck-wrapper { width: 100%; overflow-x: auto; padding: 30px 0; white-space: nowrap; cursor: grab; -webkit-overflow-scrolling: touch; }
-        .deck-wrapper::-webkit-scrollbar { height: 6px; }
-        .deck-wrapper::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
-
-        /* 牌背樣式 */
-        .tarot-card { 
-            display: inline-block; width: 70px; height: 120px; 
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: 2px solid var(--gold); border-radius: 8px; margin: 0 5px;
-            position: relative; cursor: pointer; transition: 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            background-image: radial-gradient(var(--gold) 1px, transparent 1px);
-            background-size: 10px 10px;
+        :root { --gold: #d4af37; --bg: #0a0a12; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'PingFang TC', sans-serif; 
+            background: var(--bg); 
+            color: #fff; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            min-height: 100vh;
+            padding: 20px;
         }
-        .tarot-card:hover { transform: translateY(-15px); border-color: #fff; }
-        .tarot-card.selected { opacity: 0.3; pointer-events: none; transform: scale(0.8); }
+        
+        .header-section { margin-bottom: 20px; text-align: center; width: 100%; }
+        h1 { color: var(--gold); font-size: 1.4rem; margin: 10px 0; }
+        p { font-size: 0.9rem; color: #aaa; }
+
+        /* 下拉選單優化 */
+        .control-panel { width: 100%; max-width: 400px; margin-bottom: 20px; }
+        select { 
+            width: 100%; 
+            background: #1a1a2e; 
+            color: white; 
+            border: 1px solid var(--gold); 
+            padding: 12px; 
+            border-radius: 10px; 
+            font-size: 1rem;
+            appearance: none;
+        }
+
+        /* 牌組滑動區域 - 修正排版 */
+        .deck-container {
+            width: 100vw;
+            overflow-x: auto;
+            padding: 20px 0;
+            display: flex;
+            gap: 10px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .deck-container::-webkit-scrollbar { display: none; }
+
+        .tarot-card { 
+            flex: 0 0 80px;
+            height: 130px; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid var(--gold); 
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: rgba(212, 175, 55, 0.5);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .tarot-card.selected { opacity: 0.2; transform: scale(0.8); pointer-events: none; }
+
+        /* 結果顯示區 */
+        .result-list { width: 100%; max-width: 400px; margin-top: 20px; }
+        .result-item { 
+            background: #16213e; 
+            border-left: 4px solid var(--gold); 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            animation: slideUp 0.4s ease-out;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .pos-name { color: var(--gold); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; display: block; }
+        .card-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; display: block; }
+        .card-desc { font-size: 0.9rem; color: #ccc; line-height: 1.5; }
+
+        /* 按鈕優化 */
+        .main-btn { 
+            background: var(--gold); 
+            color: #000; 
+            border: none; 
+            padding: 15px 40px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+        .main-btn:active { transform: scale(0.95); }
 
         /* 洗牌動畫 */
-        @keyframes shuffle {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(50px) rotate(5deg); }
-            50% { transform: translateX(-50px) rotate(-5deg); }
-            100% { transform: translateX(0); }
+        .shuffling .tarot-card { animation: shake 0.5s infinite; }
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(2px, -5px) rotate(2deg); }
+            50% { transform: translate(-2px, 5px) rotate(-2deg); }
+            100% { transform: translate(0, 0); }
         }
-        .shuffling .tarot-card { animation: shuffle 0.4s ease-in-out infinite; }
-
-        /* 結果顯示 */
-        .result-area { margin-top: 20px; text-align: left; }
-        .result-box { background: #252545; border-left: 4px solid var(--gold); padding: 15px; border-radius: 8px; margin-bottom: 10px; animation: fadeIn 0.5s forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .pos-label { color: var(--gold); font-size: 0.8rem; font-weight: bold; }
-        .card-name { font-size: 1.2rem; margin: 5px 0; display: block; }
-        .card-mean { font-size: 0.9rem; color: #ccc; line-height: 1.5; }
-
-        button { background: var(--gold); color: #000; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1 id="status">準備好占卜了嗎？</h1>
-    
-    <div id="setup-ui">
-        <select id="spreadSelect">
-            <option value="1">單張指引</option>
-            <option value="3">三張牌陣 (過去/現在/未來)</option>
-            <option value="4">四張牌陣 (地火水風)</option>
-            <option value="6">六張牌陣 (全方位解析)</option>
-            <option value="7">七張牌陣 (週運勢/脈輪)</option>
-        </select>
-        <br>
-        <button onclick="startShuffle()">開始洗牌</button>
-    </div>
+<div class="header-section">
+    <h1 id="status-text">Haru 的靈魂占卜</h1>
+    <p id="sub-text">靜下心來，默想你的問題</p>
+</div>
 
-    <div id="game-ui" style="display:none;">
-        <p id="hint">請左右滑動，憑直覺挑選 <span id="remain"></span> 張牌</p>
-        <div class="deck-wrapper" id="deck"></div>
+<div id="setup-view" class="control-panel">
+    <select id="spreadType">
+        <option value="1">單張指引</option>
+        <option value="3">三張牌陣 (過去/現在/未來)</option>
+        <option value="4">四張牌陣 (四大元素方位)</option>
+        <option value="6">六張牌陣 (自我/關係/建議)</option>
+        <option value="7">七張牌陣 (週運勢解析)</option>
+    </select>
+    <div style="margin-top: 30px; text-align: center;">
+        <button class="main-btn" onclick="handleShuffle()">開始洗牌</button>
     </div>
+</div>
 
-    <div id="result-area"></div>
-    <button id="retry-btn" style="display:none;" onclick="location.reload()">重新占卜</button>
+<div id="game-view" style="display:none; width: 100%;">
+    <p style="text-align:center;">左右滑動牌組，挑選 <span id="need-count" style="color:var(--gold); font-weight:bold;"></span> 張牌</p>
+    <div class="deck-container" id="deck-display"></div>
+</div>
+
+<div id="result-display" class="result-list"></div>
+
+<div id="footer-action" style="display:none; margin: 20px 0;">
+    <button class="main-btn" onclick="location.reload()">重新占卜</button>
 </div>
 
 <script>
-    const tarotDeck = [
-        { name: "0 愚者", mean: "新的冒險與開始，保持純真與勇氣。" },
-        { name: "I 魔術師", mean: "展現才華，萬事具備，發揮創意。" },
-        { name: "II 女祭司", mean: "直覺敏銳，內在智慧，靜觀其變。" },
-        { name: "III 皇后", mean: "生活富足豐盛，感受愛與美。" },
-        { name: "IV 皇帝", mean: "權威穩定，建立秩序與掌控。" },
-        { name: "V 教皇", mean: "尋求指引，遵循傳統智慧與規範。" },
-        { name: "VI 戀人", mean: "美好的選擇，情感的和諧聯繫。" },
-        { name: "VII 戰車", mean: "意志堅定，克服障礙邁向勝利。" },
-        { name: "VIII 力量", mean: "溫柔的力量能戰勝內心的恐懼。" },
-        { name: "IX 隱士", mean: "退回內心，尋找自我的真理。" },
-        { name: "X 命運之輪", mean: "時來運轉，新的契機即將出現。" },
-        { name: "XI 正義", mean: "公平誠實，做出理性的決定。" },
-        { name: "XII 倒吊人", mean: "換個角度思考，現在需要等待。" },
-        { name: "XIII 死亡", mean: "舊的結束，即將迎來新的蛻變。" },
-        { name: "XIV 節制", mean: "尋求平衡，融合不同的可能性。" },
-        { name: "XV 魔鬼", mean: "覺察慾望，打破自我束縛的枷鎖。" },
-        { name: "XVI 高塔", mean: "震撼的改變，摧毀後的重生。" },
-        { name: "XVII 星星", mean: "希望不滅，平靜與心靈的療癒。" },
-        { name: "XVIII 月亮", mean: "探索不安，潛意識的夢境指引。" },
-        { name: "XIX 太陽", mean: "光明燦爛，充滿喜悅與活力。" },
-        { name: "XX 審判", mean: "覺醒的時刻，做出關鍵的召喚。" },
-        { name: "XXI 世界", mean: "圓滿達成，生命旅程的里程碑。" },
-        // ... 為了代碼簡潔，這裡程式會自動生成小阿爾克那名牌
+    const tarotData = [
+        { n: "0 愚者", m: "新的冒險與開始，保持純真與勇氣。" },
+        { n: "I 魔術師", m: "展現才華，萬事具備，發揮創意。" },
+        { n: "II 女祭司", m: "直覺敏銳，內在智慧，靜觀其變。" },
+        { n: "III 皇后", m: "生活富足豐盛，感受愛與美。" },
+        { n: "IV 皇帝", m: "權威穩定，建立秩序與掌控。" },
+        { n: "V 教皇", m: "尋求指引，遵循傳統智慧與規範。" },
+        { n: "VI 戀人", mean: "美好的選擇，情感的和諧聯繫。" },
+        { n: "VII 戰車", m: "意志堅定，克服障礙邁向勝利。" },
+        { n: "VIII 力量", m: "溫柔的力量能戰勝內心的恐懼。" },
+        { n: "IX 隱士", m: "退回內心，尋找自我的真理。" },
+        { n: "X 命運之輪", m: "時來運轉，新的契機即將出現。" },
+        { n: "XI 正義", m: "公平誠實，做出理性的決定。" },
+        { n: "XII 倒吊人", m: "換個角度思考，現在需要等待。" },
+        { n: "XIII 死亡", m: "舊的結束，即將迎來新的蛻變。" },
+        { n: "XIV 節制", m: "尋求平衡，融合不同的可能性。" },
+        { n: "XV 魔鬼", m: "覺察慾望，打破自我束縛的枷鎖。" },
+        { n: "XVI 高塔", m: "震撼的改變，摧毀後的重生。" },
+        { n: "XVII 星星", m: "希望不滅，平靜與心靈的療癒。" },
+        { n: "XVIII 月亮", m: "探索不安，潛意識的夢境指引。" },
+        { n: "XIX 太陽", m: "光明燦難，充滿喜悅與活力。" },
+        { n: "XX 審判", m: "覺醒的時刻，做出關鍵的召喚。" },
+        { n: "XXI 世界", m: "圓滿達成，生命旅程的里程碑。" }
     ];
 
-    // 自動補齊小阿爾克那
-    ["權杖", "聖杯", "寶劍", "錢幣"].forEach(suit => {
-        for(let i=1; i<=10; i++) tarotDeck.push({name: suit+i, mean: "這是一張關於"+suit+"元素的牌，象徵生活中的特定能量。"});
-        ["侍者", "騎士", "皇后", "國王"].forEach(p => tarotDeck.push({name: suit+p, mean: "這是一個"+suit+"人物，代表某種特質或重要他人。"}));
+    // 補齊 78 張
+    const suits = ["權杖", "聖杯", "寶劍", "錢幣"];
+    suits.forEach(s => {
+        for(let i=1; i<=10; i++) tarotData.push({n: s+i, m: "象徵"+s+"能量的階段性展現。"});
+        ["侍者", "騎士", "皇后", "國王"].forEach(p => tarotData.push({n: s+p, m: "代表"+s+"特質的人物或行動。控制與發展。"}));
     });
 
-    const positions = {
-        "1": ["建議"], "3": ["過去", "現在", "未來"],
-        "4": ["思維", "行動", "情感", "物質"],
+    const posConfig = {
+        "1": ["神聖指引"],
+        "3": ["過去 (Past)", "現在 (Present)", "未來 (Future)"],
+        "4": ["風 (思考)", "火 (行動)", "水 (情感)", "土 (現實)"],
         "6": ["現狀", "環境", "阻礙", "建議", "他人", "結果"],
         "7": ["週一", "週二", "週三", "週四", "週五", "週六", "週日"]
     };
 
-    let targetCount = 0;
-    let pickedCount = 0;
-    let shuffledIndices = [];
+    let pickGoal = 0;
+    let pickedNum = 0;
+    let pool = [];
 
-    function startShuffle() {
-        targetCount = parseInt(document.getElementById('spreadSelect').value);
-        document.getElementById('setup-ui').style.display = "none";
-        document.getElementById('game-ui').style.display = "block";
-        document.getElementById('status').innerText = "正在為您洗牌...";
+    function handleShuffle() {
+        pickGoal = parseInt(document.getElementById('spreadType').value);
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('status-text').innerText = "啟動能量中...";
         
-        const deckDiv = document.getElementById('deck');
-        deckDiv.classList.add('shuffling');
+        const deck = document.getElementById('deck-display');
+        document.getElementById('game-view').style.display = 'block';
+        deck.classList.add('shuffling');
 
-        // 生成 78 張蓋牌
-        for (let i = 0; i < 78; i++) {
-            let card = document.createElement('div');
-            card.className = "tarot-card";
-            deckDiv.appendChild(card);
+        // 生成牌背
+        for(let i=0; i<78; i++) {
+            const c = document.createElement('div');
+            c.className = 'tarot-card';
+            c.innerText = 'TAROT';
+            deck.appendChild(c);
         }
 
-        // 模擬洗牌時間
         setTimeout(() => {
-            deckDiv.classList.remove('shuffling');
-            document.getElementById('status').innerText = "洗牌完成，請抽牌";
-            document.getElementById('remain').innerText = targetCount;
-            enablePicking();
-        }, 2000);
+            deck.classList.remove('shuffling');
+            document.getElementById('status-text').innerText = "請抽牌";
+            document.getElementById('need-count').innerText = pickGoal;
+            initGame();
+        }, 1500);
     }
 
-    function enablePicking() {
-        // 先隨機打亂 78 張牌的索引
-        shuffledIndices = Array.from({length: 78}, (_, i) => i).sort(() => Math.random() - 0.5);
-        
+    function initGame() {
+        pool = [...tarotData].sort(() => Math.random() - 0.5);
         const cards = document.querySelectorAll('.tarot-card');
-        cards.forEach((card, i) => {
-            card.onclick = () => {
-                if (pickedCount < targetCount && !card.classList.contains('selected')) {
-                    card.classList.add('selected');
-                    const cardData = tarotDeck[shuffledIndices[i] % tarotDeck.length];
-                    showResult(cardData);
-                    pickedCount++;
-                    document.getElementById('remain').innerText = targetCount - pickedCount;
-
-                    if (pickedCount === targetCount) {
-                        document.getElementById('game-ui').style.display = "none";
-                        document.getElementById('status').innerText = "占卜結果已顯現";
-                        document.getElementById('retry-btn').style.display = "inline-block";
+        cards.forEach((el, idx) => {
+            el.onclick = () => {
+                if(pickedNum < pickGoal && !el.classList.contains('selected')) {
+                    el.classList.add('selected');
+                    renderResult(pool[idx]);
+                    pickedNum++;
+                    document.getElementById('need-count').innerText = pickGoal - pickedNum;
+                    
+                    if(pickedNum === pickGoal) {
+                        document.getElementById('game-view').style.display = 'none';
+                        document.getElementById('status-text').innerText = "啟示已顯現";
+                        document.getElementById('footer-action').style.display = 'block';
                     }
                 }
             };
         });
     }
 
-    function showResult(data) {
-        const area = document.getElementById('result-area');
-        const box = document.createElement('div');
-        box.className = "result-box";
-        const label = positions[targetCount][pickedCount];
-        box.innerHTML = `<span class="pos-label">${label}</span><span class="card-name">${data.name}</span><p class="card-mean">${data.mean}</p>`;
-        area.appendChild(box);
+    function renderResult(data) {
+        const res = document.getElementById('result-display');
+        const div = document.createElement('div');
+        div.className = 'result-item';
+        const label = posConfig[pickGoal][pickedNum];
+        div.innerHTML = `<span class="pos-name">${label}</span><span class="card-title">${data.n}</span><p class="card-desc">${data.m}</p>`;
+        res.appendChild(div);
     }
 </script>
-</body>
-</html>
-            <option value="4">四張牌陣 (四大元素方位)</option>
-            <option value="6">六張牌陣 (自我、關係與阻礙)</option>
-            <option value="7">七張牌陣 (脈輪或完整週運勢)</option>
-        </select>
-    </div>
 
-    <p id="hint" style="color:#888;">請根據直覺挑選卡片：</p>
-    <div id="deck" class="deck-area"></div>
-    <div id="result-area" class="result-area"></div>
-    <button id="reset-btn" class="btn-reset" onclick="initDeck()">重新占卜</button>
-</div>
-
-<script>
-    const tarotDeck = [
-        { name: "0 愚者", mean: "新的冒險與開始，保持純真與勇氣。", color: "#FFF9C4" },
-        { name: "I 魔術師", mean: "展現才華，萬事具備，發揮創意。", color: "#E1BEE7" },
-        { name: "II 女祭司", mean: "直覺敏銳，內在智慧，靜觀其變。", color: "#C5CAE9" },
-        { name: "III 皇后", mean: "生活富足豐盛，感受愛與美。", color: "#F8BBD0" },
-        { name: "IV 皇帝", mean: "權威穩定，建立秩序與掌控。", color: "#FFCCBC" },
-        { name: "V 教皇", mean: "尋求指引，遵循傳統智慧與規範。", color: "#D7CCC8" },
-        { name: "VI 戀人", mean: "美好的選擇，情感的和諧聯繫。", color: "#FCE4EC" },
-        { name: "VII 戰車", mean: "意志堅定，克服障礙邁向勝利。", color: "#CFD8DC" },
-        { name: "VIII 力量", mean: "溫柔的力量能戰勝內心的恐懼。", color: "#FFE082" },
-        { name: "IX 隱士", mean: "退回內心，尋找自我的真理。", color: "#EEEEEE" },
-        { name: "X 命運之輪", mean: "時來運轉，新的契機即將出現。", color: "#FFD700" },
-        { name: "XI 正義", mean: "公平誠實，做出理性的決定。", color: "#C8E6C9" },
-        { name: "XII 倒吊人", mean: "換個角度思考，現在需要等待。", color: "#B3E5FC" },
-        { name: "XIII 死亡", mean: "舊的結束，即將迎來新的蛻變。", color: "#BDBDBD" },
-        { name: "XIV 節制", mean: "尋求平衡，融合不同的可能性。", color: "#E0F2F1" },
-        { name: "XV 魔鬼", mean: "覺察慾望，打破自我束縛的枷鎖。", color: "#A1887F" },
-        { name: "XVI 高塔", mean: "震撼的改變，摧毀後的重生。", color: "#FFAB91" },
-        { name: "XVII 星星", mean: "希望不滅，平靜與心靈的療癒。", color: "#81D4FA" },
-        { name: "XVIII 月亮", mean: "探索不安，潛意識的夢境指引。", color: "#9575CD" },
-        { name: "XIX 太陽", mean: "光明燦爛，充滿喜悅與活力。", color: "#FFB74D" },
-        { name: "XX 審判", mean: "覺醒的時刻，做出關鍵的召喚。", color: "#FFF59D" },
-        { name: "XXI 世界", mean: "圓滿達成，生命旅程的里程碑。", color: "#D1C4E9" },
-        { name: "權杖一", mean: "熱情的新計畫，行動力滿點。", color: "#FFCC80" },
-        { name: "權杖二", mean: "規劃未來，跨出舒適圈去探索。", color: "#FFE0B2" },
-        { name: "權杖三", mean: "展望遠方，合作與擴展的機會。", color: "#FFB74D" },
-        { name: "權杖四", mean: "歡慶成功，獲得穩定的喜悅。", color: "#FFF176" },
-        { name: "權杖五", mean: "混亂與競爭，需要耐心應對。", color: "#FF8A65" },
-        { name: "權杖六", mean: "獲得勝利與榮耀，受人愛戴。", color: "#FFD54F" },
-        { name: "權杖七", mean: "堅持立場，捍衛自己的成果。", color: "#A1887F" },
-        { name: "權杖八", mean: "訊息傳遞快速，進展神速。", color: "#81D4FA" },
-        { name: "權杖九", mean: "最後防線，保持警覺心。", color: "#90A4AE" },
-        { name: "權杖十", mean: "負擔過重，該找時間休息了。", color: "#795548" },
-        { name: "權杖侍者", mean: "好奇的消息，開始新學習。", color: "#FFECB3" },
-        { name: "權杖騎士", mean: "勇敢追尋夢想，行動果敢。", color: "#FF9800" },
-        { name: "權杖皇后", mean: "散發自信光芒，富有感染力。", color: "#FFB300" },
-        { name: "權杖國王", mean: "成熟的領導，展現遠大抱負。", color: "#F57C00" },
-        { name: "聖杯一", mean: "情感新契機，內心喜悅湧現。", color: "#E1F5FE" },
-        { name: "聖杯二", mean: "情感和諧，建立深厚的默契。", color: "#FCE4EC" },
-        { name: "聖杯三", mean: "友誼聚會，分享快樂的時光。", color: "#F8BBD0" },
-        { name: "聖杯四", mean: "內省時刻，對現狀感到沉思。", color: "#B3E5FC" },
-        { name: "聖杯五", mean: "悲傷後仍有希望，看向未來。", color: "#CFD8DC" },
-        { name: "聖杯六", mean: "溫馨的回憶，收到純真驚喜。", color: "#FFF9C4" },
-        { name: "聖杯七", mean: "夢想眾多，需要釐清真實需求。", color: "#E1BEE7" },
-        { name: "聖杯八", mean: "追尋更高理想，毅然離去。", color: "#1A237E" },
-        { name: "聖杯九", mean: "願望成真，內心感到極大滿足。", color: "#FFF176" },
-        { name: "聖杯十", mean: "情感圓滿，享受家庭的和諧。", color: "#E8F5E9" },
-        { name: "聖杯侍者", mean: "感性的好消息，發揮想像力。", color: "#F3E5F5" },
-        { name: "聖杯騎士", mean: "浪漫的消息，追求心中的理想。", color: "#CE93D8" },
-        { name: "聖杯皇后", mean: "溫柔慈悲，充滿包容的愛。", color: "#81D4FA" },
-        { name: "聖杯國王", mean: "情緒成熟穩定，包容所有可能。", color: "#0288D1" },
-        { name: "寶劍一", mean: "理智清晰，獲得新的思維突破。", color: "#E0F7FA" },
-        { name: "寶劍二", mean: "面臨選擇，需要冷靜找尋平衡。", color: "#ECEFF1" },
-        { name: "寶劍三", mean: "情感傷痛，正是清理與療癒之時。", color: "#B0BEC5" },
-        { name: "寶劍四", mean: "靜養充電，暫時放下忙碌。", color: "#F5F5F5" },
-        { name: "寶劍五", mean: "衝突與爭執，應避開無謂競爭。", color: "#607D8B" },
-        { name: "寶劍六", mean: "渡過難關，正往平靜的方向去。", color: "#B2EBF2" },
-        { name: "寶劍七", mean: "運用智慧，採取靈活策略。", color: "#80DEEA" },
-        { name: "寶劍八", mean: "打破自我設限，你看得見出口。", color: "#78909C" },
-        { name: "寶劍九", mean: "壓力較大，別讓擔憂控制了你。", color: "#263238" },
-        { name: "寶劍十", mean: "觸底反彈，最糟的已經過去。", color: "#37474F" },
-        { name: "寶劍侍者", mean: "機警的消息，保持好奇與機敏。", color: "#E1F5FE" },
-        { name: "寶劍騎士", mean: "勇往直前，迅速解決問題。", color: "#4FC3F7" },
-        { name: "寶劍皇后", mean: "獨立冷靜，做出明智的判斷。", color: "#B0C4DE" },
-        { name: "寶劍國王", mean: "具備專業判斷力，展現威信。", color: "#455A64" },
-        { name: "錢幣一", mean: "財運契機，物質豐饒的新起點。", color: "#FFF9C4" },
-        { name: "錢幣二", mean: "靈活應對，在變動中找平衡。", color: "#C8E6C9" },
-        { name: "錢幣三", mean: "展現專業，與團隊合作愉快。", color: "#D7CCC8" },
-        { name: "錢幣四", mean: "守住成果，但別忘了保持彈性。", color: "#A1887F" },
-        { name: "錢幣五", mean: "困境中互助，溫暖一直在身邊。", color: "#BDBDBD" },
-        { name: "錢幣六", mean: "施與受的和諧，慷慨帶來好運。", color: "#FFECB3" },
-        { name: "錢幣七", mean: "耐心等待成果，評估下一步。", color: "#DCEDC8" },
-        { name: "錢幣八", mean: "專注細節，磨練技能會大成。", color: "#8D6E63" },
-        { name: "錢幣九", mean: "獨立自主，享受優質的生活。", color: "#FBC02D" },
-        { name: "錢幣十", mean: "長久穩定，共享家族的榮耀。", color: "#F9A825" },
-        { name: "錢幣侍者", mean: "務實的訊息，開始新的投資。", color: "#F0F4C3" },
-        { name: "錢幣騎士", mean: "腳踏實地，穩重完成任務。", color: "#689F38" },
-        { name: "錢幣皇后", mean: "溫柔照顧身邊人，生活富足。", color: "#81C784" },
-        { name: "錢幣國王", mean: "事業有成，擁有穩固的基礎。", color: "#33691E" }
-    ];
-
-    const positionData = {
-        "1": ["當下指引"],
-        "3": ["過去 (Past)", "現在 (Present)", "未來 (Future)"],
-        "4": ["風之方位 (思維/溝通)", "火之方位 (熱情/行動)", "水之方位 (情感/直覺)", "土之方位 (物質/現實)"],
-        "6": ["目前的內在狀態", "外在環境影響", "潛意識與阻礙", "需要採取的行動", "他人眼中的你", "最終發展預測"],
-        "7": ["週一 / 第一脈輪", "週二 / 第二脈輪", "週三 / 第三脈輪", "週四 / 第四脈輪", "週五 / 第五脈輪", "週六 / 第六脈輪", "週日 / 第七脈輪"]
-    };
-
-    let drawnCount = 0;
-    let targetCount = 1;
-    let shuffledDeck = [];
-
-    function initDeck() {
-        targetCount = parseInt(document.getElementById('spreadCount').value);
-        drawnCount = 0;
-        shuffledDeck = [...tarotDeck].sort(() => 0.5 - Math.random());
-        
-        document.getElementById('deck').innerHTML = "";
-        document.getElementById('result-area').innerHTML = "";
-        document.getElementById('reset-btn').style.display = "none";
-        document.getElementById('hint').style.display = "block";
-        document.getElementById('header').innerText = "請默想你的問題";
-        document.body.style.backgroundColor = "#f4f4f9";
-
-        let cardDisplayCount = Math.max(targetCount, 8); 
-        for (let i = 0; i < cardDisplayCount; i++) {
-            let card = document.createElement('div');
-            card.className = "tarot-back";
-            card.innerText = "靈魂卡";
-            card.onclick = () => pickCard(card, i);
-            document.getElementById('deck').appendChild(card);
-        }
-    }
-
-    function pickCard(cardElement, index) {
-        if (drawnCount >= targetCount) return;
-
-        const card = shuffledDeck[index];
-        const resultItem = document.createElement('div');
-        resultItem.className = "result-box";
-        resultItem.style.display = "block";
-        
-        let label = positionData[targetCount][drawnCount];
-        resultItem.innerHTML = `<span style="font-size:0.75rem; color:#888;">${label}</span><span class="tarot-name">${card.name}</span><span class="tarot-mean">${card.mean}</span>`;
-        
-        document.getElementById('result-area').appendChild(resultItem);
-        cardElement.style.visibility = "hidden";
-        drawnCount++;
-
-        if (drawnCount === 1) document.body.style.backgroundColor = card.color;
-
-        if (drawnCount >= targetCount) {
-            document.getElementById('deck').innerHTML = "";
-            document.getElementById('hint').style.display = "none";
-            document.getElementById('header').innerText = "占卜結果已顯現";
-            document.getElementById('reset-btn').style.display = "block";
-        }
-    }
-
-    initDeck();
-    document.getElementById('spreadCount').onchange = initDeck;
-</script>
-</body>
-</html>
-    </div>
-    <div id="result-list" class="result-area">
-        <p class="hint">靜下心來，默想你的問題...<br>準備好後按下按鈕啟動能量。</p>
-    </div>
-    <button onclick="drawTarot()">開始占卜</button>
-</div>
-<script>
-    const tarotDeck = [
-        { name: "0 愚者", mean: "新的冒險與開始，保持純真與勇氣。", color: "#FFF9C4" },
-        { name: "I 魔術師", mean: "展現才華，萬事具備，發揮創意。", color: "#E1BEE7" },
-        { name: "II 女祭司", mean: "直覺敏銳，內在智慧，靜觀其變。", color: "#C5CAE9" },
-        { name: "III 皇后", mean: "生活富足豐盛，感受愛與美。", color: "#F8BBD0" },
-        { name: "IV 皇帝", mean: "權威穩定，建立秩序與掌控。", color: "#FFCCBC" },
-        { name: "V 教皇", mean: "尋求指引，遵循傳統智慧與規範。", color: "#D7CCC8" },
-        { name: "VI 戀人", mean: "美好的選擇，情感的和諧聯繫。", color: "#FCE4EC" },
-        { name: "VII 戰車", mean: "意志堅定，克服障礙邁向勝利。", color: "#CFD8DC" },
-        { name: "VIII 力量", mean: "溫柔的力量能戰勝內心的恐懼。", color: "#FFE082" },
-        { name: "IX 隱士", mean: "退回內心，尋找自我的真理。", color: "#EEEEEE" },
-        { name: "X 命運之輪", mean: "時來運轉，新的契機即將出現。", color: "#FFD700" },
-        { name: "XI 正義", mean: "公平誠實，做出理性的決定。", color: "#C8E6C9" },
-        { name: "XII 倒吊人", mean: "換個角度思考，現在需要等待。", color: "#B3E5FC" },
-        { name: "XIII 死亡", mean: "舊的結束，即將迎來新的蛻變。", color: "#BDBDBD" },
-        { name: "XIV 節制", mean: "尋求平衡，融合不同的可能性。", color: "#E0F2F1" },
-        { name: "XV 魔鬼", mean: "覺察慾望，打破自我束縛的枷鎖。", color: "#A1887F" },
-        { name: "XVI 高塔", mean: "震撼的改變，摧毀後的重生。", color: "#FFAB91" },
-        { name: "XVII 星星", mean: "希望不滅，平靜與心靈的療癒。", color: "#81D4FA" },
-        { name: "XVIII 月亮", mean: "探索不安，潛意識的夢境指引。", color: "#9575CD" },
-        { name: "XIX 太陽", mean: "光明燦爛，充滿喜悅與活力。", color: "#FFB74D" },
-        { name: "XX 審判", mean: "覺醒的時刻，做出關鍵的召喚。", color: "#FFF59D" },
-        { name: "XXI 世界", mean: "圓滿達成，生命旅程的里程碑。", color: "#D1C4E9" },
-        { name: "權杖一", mean: "熱情的新計畫，行動力滿點。", color: "#FFCC80" },
-        { name: "權杖二", mean: "規劃未來，跨出舒適圈去探索。", color: "#FFE0B2" },
-        { name: "權杖三", mean: "展望遠方，合作與擴展的機會。", color: "#FFB74D" },
-        { name: "權杖四", mean: "歡慶成功，獲得穩定的喜悅。", color: "#FFF176" },
-        { name: "權杖五", mean: "混勞與競爭，需要耐心應對。", color: "#FF8A65" },
-        { name: "權杖六", mean: "獲得勝利與榮耀，受人愛戴。", color: "#FFD54F" },
-        { name: "權杖七", mean: "堅持立場，捍衛自己的成果。", color: "#A1887F" },
-        { name: "權杖八", mean: "訊息傳遞快速，進展神速。", color: "#81D4FA" },
-        { name: "權杖九", mean: "最後防線，保持警覺心。", color: "#90A4AE" },
-        { name: "權杖十", mean: "負擔過重，該找時間休息了。", color: "#795548" },
-        { name: "權杖侍者", mean: "好奇的消息，開始新學習。", color: "#FFECB3" },
-        { name: "權杖騎士", mean: "勇敢追尋夢想，行動果敢。", color: "#FF9800" },
-        { name: "權杖皇后", mean: "散發自信光芒，富有感染力。", color: "#FFB300" },
-        { name: "權杖國王", mean: "成熟的領導，展現遠大抱負。", color: "#F57C00" },
-        { name: "聖杯一", mean: "情感新契機，內心喜悅湧現。", color: "#E1F5FE" },
-        { name: "聖杯二", mean: "情感和諧，建立深厚的默契。", color: "#FCE4EC" },
-        { name: "聖杯三", mean: "友誼聚會，分享快樂的時光。", color: "#F8BBD0" },
-        { name: "聖杯四", mean: "內省時刻，對現狀感到沉思。", color: "#B3E5FC" },
-        { name: "聖杯五", mean: "悲傷後仍有希望，看向未來。", color: "#CFD8DC" },
-        { name: "聖杯六", mean: "溫馨的回憶，收到純真驚喜。", color: "#FFF9C4" },
-        { name: "聖杯七", mean: "夢想眾多，需要釐清真實需求。", color: "#E1BEE7" },
-        { name: "聖杯八", mean: "追尋更高理想，毅然離去。", color: "#1A237E" },
-        { name: "聖杯九", mean: "願望成真，內心感到極大滿足。", color: "#FFF176" },
-        { name: "聖杯十", mean: "情感圓滿，享受家庭的和諧。", color: "#E8F5E9" },
-        { name: "聖杯侍者", mean: "感性的好消息，發揮想像力。", color: "#F3E5F5" },
-        { name: "聖杯騎士", mean: "浪漫的消息，追求心中的理想。", color: "#CE93D8" },
-        { name: "聖杯皇后", mean: "溫柔慈悲，充滿包容的愛。", color: "#81D4FA" },
-        { name: "聖杯國王", mean: "情緒成熟穩定，包容所有可能。", color: "#0288D1" },
-        { name: "寶劍一", mean: "理智清晰，獲得新的思維突破。", color: "#E0F7FA" },
-        { name: "寶劍二", mean: "面臨選擇，需要冷靜找尋平衡。", color: "#ECEFF1" },
-        { name: "寶劍三", mean: "情感傷痛，正是清理與療癒之時。", color: "#B0BEC5" },
-        { name: "寶劍四", mean: "靜養充電，暫時放下忙碌。", color: "#F5F5F5" },
-        { name: "寶劍五", mean: "衝突與爭執，應避開無謂競爭。", color: "#607D8B" },
-        { name: "寶劍六", mean: "渡過難關，正往平靜的方向去。", color: "#B2EBF2" },
-        { name: "寶劍七", mean: "運用智慧，採取靈活策略。", color: "#80DEEA" },
-        { name: "寶劍八", mean: "打破自我設限，你看得見出口。", color: "#78909C" },
-        { name: "寶劍九", mean: "壓力較大，別讓擔憂控制了你。", color: "#263238" },
-        { name: "寶劍十", mean: "觸底反彈，最糟的已經過去。", color: "#37474F" },
-        { name: "寶劍侍者", mean: "警覺的消息，保持好奇與機敏。", color: "#E1F5FE" },
-        { name: "寶劍騎士", mean: "勇往直前，迅速解決問題。", color: "#4FC3F7" },
-        { name: "寶劍皇后", mean: "獨立冷靜，做出明智的判斷。", color: "#B0C4DE" },
-        { name: "寶劍國王", mean: "具備專業判斷力，展現威信。", color: "#455A64" },
-        { name: "錢幣一", mean: "財運契機，物質豐饒的新起點。", color: "#FFF9C4" },
-        { name: "錢幣二", mean: "靈活應對，在變動中找平衡。", color: "#C8E6C9" },
-        { name: "錢幣三", mean: "展現專業，與團隊合作愉快。", color: "#D7CCC8" },
-        { name: "錢幣四", mean: "守住成果，但別忘了保持彈性。", color: "#A1887F" },
-        { name: "錢幣五", mean: "困境中互助，溫暖一直在身邊。", color: "#BDBDBD" },
-        { name: "錢幣六", mean: "施與受的和諧，慷慨帶來好運。", color: "#FFECB3" },
-        { name: "錢幣七", mean: "耐心等待成果，評估下一步。", color: "#DCEDC8" },
-        { name: "錢幣八", mean: "專注細節，磨練技能會大成。", color: "#8D6E63" },
-        { name: "錢幣九", mean: "獨立自主，享受優質的生活。", color: "#FBC02D" },
-        { name: "錢幣十", mean: "長久穩定，共享家族的榮耀。", color: "#F9A825" },
-        { name: "錢幣侍者", mean: "務實的訊息，開始新的投資。", color: "#F0F4C3" },
-        { name: "錢幣騎士", mean: "腳踏實地，穩重完成任務。", color: "#689F38" },
-        { name: "錢幣皇后", mean: "溫柔照顧身邊人，生活富足。", color: "#81C784" },
-        { name: "錢幣國王", mean: "事業有成，擁有穩固的基礎。", color: "#33691E" }
-    ];
-    const positions = {
-        "1": ["指引："],
-        "3": ["過去 (Past)：", "現在 (Present)：", "未來 (Future)："],
-        "4": ["風之元素 (思維)：", "火之元素 (行動)：", "水之元素 (情緒)：", "土之元素 (物質)："],
-        "5": ["問題核心：", "外在干擾：", "潛在機會：", "過去基礎：", "最終導向："]
-    };
-    function drawTarot() {
-        const count = document.getElementById('spread').value;
-        const resultArea = document.getElementById('result-list');
-        resultArea.innerHTML = "";
-        let shuffled = [...tarotDeck].sort(() => 0.5 - Math.random());
-        let selected = shuffled.slice(0, parseInt(count));
-        let posLabels = positions[count];
-        selected.forEach((card, i) => {
-            let item = document.createElement('div');
-            item.className = "tarot-item";
-            item.innerHTML = `<span class="pos-label">${posLabels[i]}</span><span class="tarot-name">${card.name}</span><span class="tarot-mean">${card.mean}</span>`;
-            resultArea.appendChild(item);
-        });
-        document.body.style.backgroundColor = selected[0].color;
-    }
-</script>
 </body>
 </html>
