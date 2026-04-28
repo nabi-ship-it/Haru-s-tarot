@@ -17,14 +17,14 @@
             align-items: center; 
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
         
-        .header-section { margin-bottom: 20px; text-align: center; width: 100%; }
+        .header-section { margin-bottom: 10px; text-align: center; width: 100%; }
         h1 { color: var(--gold); font-size: 1.4rem; margin: 10px 0; }
-        p { font-size: 0.9rem; color: #aaa; }
+        p { font-size: 0.85rem; color: #aaa; margin: 5px 0; }
 
-        /* 下拉選單優化 */
-        .control-panel { width: 100%; max-width: 400px; margin-bottom: 20px; }
+        .control-panel { width: 100%; max-width: 400px; margin-bottom: 15px; }
         select { 
             width: 100%; 
             background: #1a1a2e; 
@@ -36,71 +36,63 @@
             appearance: none;
         }
 
-        /* 牌組滑動區域 - 修正排版 */
+        /* --- 關鍵修正：三排橫向滑動佈局 --- */
         .deck-container {
             width: 100vw;
             overflow-x: auto;
-            padding: 20px 0;
-            display: flex;
-            gap: 10px;
-            scroll-snap-type: x mandatory;
+            display: grid;
+            /* 設定三列橫向高度，並讓內容不換行 */
+            grid-template-rows: repeat(3, 130px); 
+            grid-auto-flow: column; /* 強制先填滿行，再往右擴展 */
+            gap: 12px;
+            padding: 20px;
             -webkit-overflow-scrolling: touch;
         }
         .deck-container::-webkit-scrollbar { display: none; }
 
         .tarot-card { 
-            flex: 0 0 80px;
-            height: 130px; 
+            width: 80px; 
+            height: 120px; 
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: 2px solid var(--gold); 
-            border-radius: 10px;
+            border: 1.5px solid var(--gold); 
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.7rem;
-            color: rgba(212, 175, 55, 0.5);
+            color: rgba(212, 175, 55, 0.4);
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             transition: transform 0.2s;
+            user-select: none;
         }
-        .tarot-card.selected { opacity: 0.2; transform: scale(0.8); pointer-events: none; }
+        .tarot-card:active { transform: scale(0.9); }
+        .tarot-card.selected { opacity: 0.15; transform: scale(0.8); pointer-events: none; border-color: #444; }
 
-        /* 結果顯示區 */
-        .result-list { width: 100%; max-width: 400px; margin-top: 20px; }
+        /* 結果區 */
+        .result-list { width: 100%; max-width: 400px; margin-top: 10px; }
         .result-item { 
             background: #16213e; 
             border-left: 4px solid var(--gold); 
             padding: 15px; 
             border-radius: 8px; 
-            margin-bottom: 15px; 
+            margin-bottom: 12px; 
             animation: slideUp 0.4s ease-out;
         }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .pos-name { color: var(--gold); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; display: block; }
-        .card-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; display: block; }
-        .card-desc { font-size: 0.9rem; color: #ccc; line-height: 1.5; }
+        .pos-name { color: var(--gold); font-size: 0.75rem; font-weight: bold; }
+        .card-title { font-size: 1.05rem; font-weight: bold; margin: 5px 0; display: block; }
+        .card-desc { font-size: 0.85rem; color: #ccc; line-height: 1.4; }
 
-        /* 按鈕優化 */
         .main-btn { 
             background: var(--gold); 
             color: #000; 
             border: none; 
-            padding: 15px 40px; 
+            padding: 14px 40px; 
             border-radius: 30px; 
             font-weight: bold; 
             font-size: 1rem;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-        }
-        .main-btn:active { transform: scale(0.95); }
-
-        /* 洗牌動畫 */
-        .shuffling .tarot-card { animation: shake 0.5s infinite; }
-        @keyframes shake {
-            0% { transform: translate(0, 0); }
-            25% { transform: translate(2px, -5px) rotate(2deg); }
-            50% { transform: translate(-2px, 5px) rotate(-2deg); }
-            100% { transform: translate(0, 0); }
         }
     </style>
 </head>
@@ -108,30 +100,30 @@
 
 <div class="header-section">
     <h1 id="status-text">Haru 的靈魂占卜</h1>
-    <p id="sub-text">靜下心來，默想你的問題</p>
+    <p id="sub-text">請默想問題，啟動能量</p>
 </div>
 
 <div id="setup-view" class="control-panel">
     <select id="spreadType">
         <option value="1">單張指引</option>
         <option value="3">三張牌陣 (過去/現在/未來)</option>
-        <option value="4">四張牌陣 (四大元素方位)</option>
-        <option value="6">六張牌陣 (自我/關係/建議)</option>
+        <option value="4">四張牌陣 (地火水風)</option>
+        <option value="6">六張牌陣 (全方位解析)</option>
         <option value="7">七張牌陣 (週運勢解析)</option>
     </select>
-    <div style="margin-top: 30px; text-align: center;">
+    <div style="margin-top: 25px; text-align: center;">
         <button class="main-btn" onclick="handleShuffle()">開始洗牌</button>
     </div>
 </div>
 
 <div id="game-view" style="display:none; width: 100%;">
-    <p style="text-align:center;">左右滑動牌組，挑選 <span id="need-count" style="color:var(--gold); font-weight:bold;"></span> 張牌</p>
+    <p style="text-align:center; font-size: 0.8rem;">👈 左右滑動選取 <span id="need-count" style="color:var(--gold); font-weight:bold;"></span> 張牌 👉</p>
     <div class="deck-container" id="deck-display"></div>
 </div>
 
 <div id="result-display" class="result-list"></div>
 
-<div id="footer-action" style="display:none; margin: 20px 0;">
+<div id="footer-action" style="display:none; margin: 20px 0; text-align: center;">
     <button class="main-btn" onclick="location.reload()">重新占卜</button>
 </div>
 
@@ -143,7 +135,7 @@
         { n: "III 皇后", m: "生活富足豐盛，感受愛與美。" },
         { n: "IV 皇帝", m: "權威穩定，建立秩序與掌控。" },
         { n: "V 教皇", m: "尋求指引，遵循傳統智慧與規範。" },
-        { n: "VI 戀人", mean: "美好的選擇，情感的和諧聯繫。" },
+        { n: "VI 戀人", m: "美好的選擇，情感的和諧聯繫。" },
         { n: "VII 戰車", m: "意志堅定，克服障礙邁向勝利。" },
         { n: "VIII 力量", m: "溫柔的力量能戰勝內心的恐懼。" },
         { n: "IX 隱士", m: "退回內心，尋找自我的真理。" },
@@ -156,22 +148,21 @@
         { n: "XVI 高塔", m: "震撼的改變，摧毀後的重生。" },
         { n: "XVII 星星", m: "希望不滅，平靜與心靈的療癒。" },
         { n: "XVIII 月亮", m: "探索不安，潛意識的夢境指引。" },
-        { n: "XIX 太陽", m: "光明燦難，充滿喜悅與活力。" },
+        { n: "XIX 太陽", m: "光明燦爛，充滿喜悅與活力。" },
         { n: "XX 審判", m: "覺醒的時刻，做出關鍵的召喚。" },
         { n: "XXI 世界", m: "圓滿達成，生命旅程的里程碑。" }
     ];
 
-    // 補齊 78 張
     const suits = ["權杖", "聖杯", "寶劍", "錢幣"];
     suits.forEach(s => {
         for(let i=1; i<=10; i++) tarotData.push({n: s+i, m: "象徵"+s+"能量的階段性展現。"});
-        ["侍者", "騎士", "皇后", "國王"].forEach(p => tarotData.push({n: s+p, m: "代表"+s+"特質的人物或行動。控制與發展。"}));
+        ["侍者", "騎士", "皇后", "國王"].forEach(p => tarotData.push({n: s+p, m: "代表"+s+"特質的人物或行動。"}));
     });
 
     const posConfig = {
         "1": ["神聖指引"],
-        "3": ["過去 (Past)", "現在 (Present)", "未來 (Future)"],
-        "4": ["風 (思考)", "火 (行動)", "水 (情感)", "土 (現實)"],
+        "3": ["過去", "現在", "未來"],
+        "4": ["思考", "行動", "情感", "現實"],
         "6": ["現狀", "環境", "阻礙", "建議", "他人", "結果"],
         "7": ["週一", "週二", "週三", "週四", "週五", "週六", "週日"]
     };
@@ -183,13 +174,12 @@
     function handleShuffle() {
         pickGoal = parseInt(document.getElementById('spreadType').value);
         document.getElementById('setup-view').style.display = 'none';
-        document.getElementById('status-text').innerText = "啟動能量中...";
         
         const deck = document.getElementById('deck-display');
+        deck.innerHTML = '';
         document.getElementById('game-view').style.display = 'block';
-        deck.classList.add('shuffling');
 
-        // 生成牌背
+        // 生成 78 張
         for(let i=0; i<78; i++) {
             const c = document.createElement('div');
             c.className = 'tarot-card';
@@ -197,12 +187,9 @@
             deck.appendChild(c);
         }
 
-        setTimeout(() => {
-            deck.classList.remove('shuffling');
-            document.getElementById('status-text').innerText = "請抽牌";
-            document.getElementById('need-count').innerText = pickGoal;
-            initGame();
-        }, 1500);
+        document.getElementById('status-text').innerText = "請抽牌";
+        document.getElementById('need-count').innerText = pickGoal;
+        initGame();
     }
 
     function initGame() {
@@ -235,6 +222,5 @@
         res.appendChild(div);
     }
 </script>
-
 </body>
 </html>
