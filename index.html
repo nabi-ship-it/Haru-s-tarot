@@ -3,37 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haru 的靈魂占卜室</title>
+    <title>Haru 的專業占卜室</title>
     <style>
-        :root { --main-bg: #f4f4f9; }
-        body { font-family: 'PingFang TC', sans-serif; background-color: var(--main-bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; transition: background 0.8s ease; }
-        .card { background: white; padding: 2rem; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; width: 95%; max-width: 550px; }
-        .type-tag { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        h1 { color: #444; font-size: 1.5rem; margin: 10px 0; }
+        :root { --gold: #d4af37; --dark-blue: #1a1a2e; }
+        body { font-family: 'PingFang TC', sans-serif; background: #0f0f1a; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
+        .container { width: 100%; max-width: 600px; text-align: center; padding: 20px; }
         
-        .deck-area { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        .tarot-back { width: 70px; height: 110px; background: #333; border-radius: 10px; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; transition: 0.3s; }
-        .tarot-back:hover { transform: translateY(-5px); background: #555; }
+        /* 選單樣式 */
+        select { background: #252545; color: white; border: 1px solid var(--gold); padding: 10px; border-radius: 8px; margin-bottom: 20px; width: 80%; }
 
-        .result-area { max-height: 400px; overflow-y: auto; padding-right: 5px; }
-        .result-box { display: none; text-align: left; background: #fdfdfd; border-left: 5px solid #333; padding: 12px; border-radius: 0 12px 12px 0; margin-top: 10px; }
-        .tarot-name { font-size: 1.1rem; font-weight: bold; color: #222; display: block; margin-bottom: 5px; }
-        .tarot-mean { font-size: 0.9rem; color: #555; line-height: 1.5; }
+        /* 牌組滑動區域 */
+        .deck-wrapper { width: 100%; overflow-x: auto; padding: 30px 0; white-space: nowrap; cursor: grab; -webkit-overflow-scrolling: touch; }
+        .deck-wrapper::-webkit-scrollbar { height: 6px; }
+        .deck-wrapper::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
-        .btn-reset { background: #333; color: white; border: none; padding: 12px; border-radius: 12px; margin-top: 20px; cursor: pointer; display: none; width: 100%; font-weight: bold; }
-        select { padding: 10px; border-radius: 10px; margin-bottom: 10px; width: 100%; font-size: 1rem; border: 1px solid #ddd; }
+        /* 牌背樣式 */
+        .tarot-card { 
+            display: inline-block; width: 70px; height: 120px; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid var(--gold); border-radius: 8px; margin: 0 5px;
+            position: relative; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            background-image: radial-gradient(var(--gold) 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+        .tarot-card:hover { transform: translateY(-15px); border-color: #fff; }
+        .tarot-card.selected { opacity: 0.3; pointer-events: none; transform: scale(0.8); }
+
+        /* 洗牌動畫 */
+        @keyframes shuffle {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(50px) rotate(5deg); }
+            50% { transform: translateX(-50px) rotate(-5deg); }
+            100% { transform: translateX(0); }
+        }
+        .shuffling .tarot-card { animation: shuffle 0.4s ease-in-out infinite; }
+
+        /* 結果顯示 */
+        .result-area { margin-top: 20px; text-align: left; }
+        .result-box { background: #252545; border-left: 4px solid var(--gold); padding: 15px; border-radius: 8px; margin-bottom: 10px; animation: fadeIn 0.5s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .pos-label { color: var(--gold); font-size: 0.8rem; font-weight: bold; }
+        .card-name { font-size: 1.2rem; margin: 5px 0; display: block; }
+        .card-mean { font-size: 0.9rem; color: #ccc; line-height: 1.5; }
+
+        button { background: var(--gold); color: #000; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="type-tag">Professional Tarot</div>
-    <h1 id="header">請默想你的問題</h1>
+<div class="container">
+    <h1 id="status">準備好占卜了嗎？</h1>
     
-    <div style="margin-bottom: 15px;">
-        <select id="spreadCount">
-            <option value="1">單張指引 (快速解答)</option>
+    <div id="setup-ui">
+        <select id="spreadSelect">
+            <option value="1">單張指引</option>
             <option value="3">三張牌陣 (過去/現在/未來)</option>
+            <option value="4">四張牌陣 (地火水風)</option>
+            <option value="6">六張牌陣 (全方位解析)</option>
+            <option value="7">七張牌陣 (週運勢/脈輪)</option>
+        </select>
+        <br>
+        <button onclick="startShuffle()">開始洗牌</button>
+    </div>
+
+    <div id="game-ui" style="display:none;">
+        <p id="hint">請左右滑動，憑直覺挑選 <span id="remain"></span> 張牌</p>
+        <div class="deck-wrapper" id="deck"></div>
+    </div>
+
+    <div id="result-area"></div>
+    <button id="retry-btn" style="display:none;" onclick="location.reload()">重新占卜</button>
+</div>
+
+<script>
+    const tarotDeck = [
+        { name: "0 愚者", mean: "新的冒險與開始，保持純真與勇氣。" },
+        { name: "I 魔術師", mean: "展現才華，萬事具備，發揮創意。" },
+        { name: "II 女祭司", mean: "直覺敏銳，內在智慧，靜觀其變。" },
+        { name: "III 皇后", mean: "生活富足豐盛，感受愛與美。" },
+        { name: "IV 皇帝", mean: "權威穩定，建立秩序與掌控。" },
+        { name: "V 教皇", mean: "尋求指引，遵循傳統智慧與規範。" },
+        { name: "VI 戀人", mean: "美好的選擇，情感的和諧聯繫。" },
+        { name: "VII 戰車", mean: "意志堅定，克服障礙邁向勝利。" },
+        { name: "VIII 力量", mean: "溫柔的力量能戰勝內心的恐懼。" },
+        { name: "IX 隱士", mean: "退回內心，尋找自我的真理。" },
+        { name: "X 命運之輪", mean: "時來運轉，新的契機即將出現。" },
+        { name: "XI 正義", mean: "公平誠實，做出理性的決定。" },
+        { name: "XII 倒吊人", mean: "換個角度思考，現在需要等待。" },
+        { name: "XIII 死亡", mean: "舊的結束，即將迎來新的蛻變。" },
+        { name: "XIV 節制", mean: "尋求平衡，融合不同的可能性。" },
+        { name: "XV 魔鬼", mean: "覺察慾望，打破自我束縛的枷鎖。" },
+        { name: "XVI 高塔", mean: "震撼的改變，摧毀後的重生。" },
+        { name: "XVII 星星", mean: "希望不滅，平靜與心靈的療癒。" },
+        { name: "XVIII 月亮", mean: "探索不安，潛意識的夢境指引。" },
+        { name: "XIX 太陽", mean: "光明燦爛，充滿喜悅與活力。" },
+        { name: "XX 審判", mean: "覺醒的時刻，做出關鍵的召喚。" },
+        { name: "XXI 世界", mean: "圓滿達成，生命旅程的里程碑。" },
+        // ... 為了代碼簡潔，這裡程式會自動生成小阿爾克那名牌
+    ];
+
+    // 自動補齊小阿爾克那
+    ["權杖", "聖杯", "寶劍", "錢幣"].forEach(suit => {
+        for(let i=1; i<=10; i++) tarotDeck.push({name: suit+i, mean: "這是一張關於"+suit+"元素的牌，象徵生活中的特定能量。"});
+        ["侍者", "騎士", "皇后", "國王"].forEach(p => tarotDeck.push({name: suit+p, mean: "這是一個"+suit+"人物，代表某種特質或重要他人。"}));
+    });
+
+    const positions = {
+        "1": ["建議"], "3": ["過去", "現在", "未來"],
+        "4": ["思維", "行動", "情感", "物質"],
+        "6": ["現狀", "環境", "阻礙", "建議", "他人", "結果"],
+        "7": ["週一", "週二", "週三", "週四", "週五", "週六", "週日"]
+    };
+
+    let targetCount = 0;
+    let pickedCount = 0;
+    let shuffledIndices = [];
+
+    function startShuffle() {
+        targetCount = parseInt(document.getElementById('spreadSelect').value);
+        document.getElementById('setup-ui').style.display = "none";
+        document.getElementById('game-ui').style.display = "block";
+        document.getElementById('status').innerText = "正在為您洗牌...";
+        
+        const deckDiv = document.getElementById('deck');
+        deckDiv.classList.add('shuffling');
+
+        // 生成 78 張蓋牌
+        for (let i = 0; i < 78; i++) {
+            let card = document.createElement('div');
+            card.className = "tarot-card";
+            deckDiv.appendChild(card);
+        }
+
+        // 模擬洗牌時間
+        setTimeout(() => {
+            deckDiv.classList.remove('shuffling');
+            document.getElementById('status').innerText = "洗牌完成，請抽牌";
+            document.getElementById('remain').innerText = targetCount;
+            enablePicking();
+        }, 2000);
+    }
+
+    function enablePicking() {
+        // 先隨機打亂 78 張牌的索引
+        shuffledIndices = Array.from({length: 78}, (_, i) => i).sort(() => Math.random() - 0.5);
+        
+        const cards = document.querySelectorAll('.tarot-card');
+        cards.forEach((card, i) => {
+            card.onclick = () => {
+                if (pickedCount < targetCount && !card.classList.contains('selected')) {
+                    card.classList.add('selected');
+                    const cardData = tarotDeck[shuffledIndices[i] % tarotDeck.length];
+                    showResult(cardData);
+                    pickedCount++;
+                    document.getElementById('remain').innerText = targetCount - pickedCount;
+
+                    if (pickedCount === targetCount) {
+                        document.getElementById('game-ui').style.display = "none";
+                        document.getElementById('status').innerText = "占卜結果已顯現";
+                        document.getElementById('retry-btn').style.display = "inline-block";
+                    }
+                }
+            };
+        });
+    }
+
+    function showResult(data) {
+        const area = document.getElementById('result-area');
+        const box = document.createElement('div');
+        box.className = "result-box";
+        const label = positions[targetCount][pickedCount];
+        box.innerHTML = `<span class="pos-label">${label}</span><span class="card-name">${data.name}</span><p class="card-mean">${data.mean}</p>`;
+        area.appendChild(box);
+    }
+</script>
+</body>
+</html>
             <option value="4">四張牌陣 (四大元素方位)</option>
             <option value="6">六張牌陣 (自我、關係與阻礙)</option>
             <option value="7">七張牌陣 (脈輪或完整週運勢)</option>
