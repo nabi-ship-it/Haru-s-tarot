@@ -3,44 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haru 的靈魂占卜室</title>
+    <title>Haru 的塔羅占卜室</title>
     <style>
         :root { --main-bg: #f4f4f9; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background-color: var(--main-bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; transition: background 0.8s ease; }
-        .card { background: white; padding: 2rem; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 400px; }
-        .type-tag { font-size: 0.8rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        h1 { color: #444; font-size: 1.6rem; margin: 10px 0; min-height: 1.6rem; }
-        .result-area { margin: 20px 0; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
-        #meaning { color: #666; line-height: 1.6; font-size: 1rem; }
-        .lucky-display { background: #fafafa; border-radius: 15px; padding: 15px; margin-top: 15px; display: none; text-align: left; }
-        .color-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-left: 8px; border: 1px solid #ddd; vertical-align: middle; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        button { background: #333; color: white; border: none; padding: 12px 5px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
-        button:active { transform: scale(0.95); }
-        .btn-lucky { background: #607d8b; }
+        .card { background: white; padding: 2rem; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 500px; margin: 20px; }
+        .type-tag { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        h1 { color: #444; font-size: 1.6rem; margin: 10px 0; }
+        .control-panel { background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; }
+        select { padding: 8px 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem; width: 100%; max-width: 250px; cursor: pointer; }
+        .result-area { margin: 20px 0; }
+        .tarot-item { background: #fff; border: 1px solid #f0f0f0; border-left: 5px solid #333; padding: 15px; margin-bottom: 12px; text-align: left; border-radius: 0 12px 12px 0; }
+        .pos-label { font-size: 0.8rem; color: #888; font-weight: bold; display: block; margin-bottom: 4px; }
+        .tarot-name { font-size: 1.1rem; color: #222; font-weight: bold; display: block; margin-bottom: 6px; }
+        .tarot-mean { font-size: 0.95rem; color: #555; line-height: 1.5; }
+        button { background: #333; color: white; border: none; padding: 15px 40px; border-radius: 15px; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.3s; font-weight: bold; }
+        button:active { transform: scale(0.98); background: #000; }
+        p.hint { color: #999; font-size: 0.9rem; line-height: 1.6; }
     </style>
 </head>
 <body>
-
 <div class="card">
-    <div id="tag" class="type-tag">Welcome</div>
-    <h1 id="title">今日指引</h1>
-    
-    <div class="result-area">
-        <p id="meaning">想看看今天的運勢嗎？<br>選一個按鈕開始抽卡吧！</p>
+    <div id="tag" class="type-tag">Tarot Reading</div>
+    <h1 id="title">靈魂啟示錄</h1>
+    <div class="control-panel">
+        <div style="margin-bottom: 10px; font-size: 0.9rem; color: #666;">選擇你想探索的牌陣：</div>
+        <select id="spread">
+            <option value="1">單張指引 (給予當下建議)</option>
+            <option value="3">三張牌陣 (過去 / 現在 / 未來)</option>
+            <option value="4">四張牌陣 (地火水風四大元素)</option>
+            <option value="5">五張牌陣 (問題核心與全面解析)</option>
+        </select>
     </div>
-
-    <div id="lucky-area" class="lucky-display">
-        <div style="margin-bottom: 8px;">🎨 幸運色：<span id="c-name"></span><span id="c-dot" class="color-dot"></span></div>
-        <div>🎁 幸運小物：<span id="item-name"></span></div>
+    <div id="result-list" class="result-area">
+        <p class="hint">靜下心來，默想你的問題...<br>準備好後按下按鈕啟動能量。</p>
     </div>
-
-    <div class="btn-group">
-        <button onclick="drawTarot()">抽塔羅牌</button>
-        <button class="btn-lucky" onclick="drawLucky()">抽幸運物</button>
-    </div>
+    <button onclick="drawTarot()">開始占卜</button>
 </div>
-
 <script>
     const tarotDeck = [
         { name: "0 愚者", mean: "新的冒險與開始，保持純真與勇氣。", color: "#FFF9C4" },
@@ -69,32 +68,79 @@
         { name: "權杖二", mean: "規劃未來，跨出舒適圈去探索。", color: "#FFE0B2" },
         { name: "權杖三", mean: "展望遠方，合作與擴展的機會。", color: "#FFB74D" },
         { name: "權杖四", mean: "歡慶成功，獲得穩定的喜悅。", color: "#FFF176" },
-        { name: "權杖五", mean: "混亂與競爭，需要耐心應對。", color: "#FF8A65" },
+        { name: "權杖五", mean: "混勞與競爭，需要耐心應對。", color: "#FF8A65" },
         { name: "權杖六", mean: "獲得勝利與榮耀，受人愛戴。", color: "#FFD54F" },
         { name: "權杖七", mean: "堅持立場，捍衛自己的成果。", color: "#A1887F" },
         { name: "權杖八", mean: "訊息傳遞快速，進展神速。", color: "#81D4FA" },
-        { name: "
-</div>
-
-<script>
-    const deck = [
-        { type: "塔羅牌", name: "0 愚者", mean: "開始一段未知的旅程，保持純真與勇氣。", color: "#FFF176", cName: "檸檬黃", item: "亮色系短襪" },
-        { type: "塔羅牌", name: "I 魔術師", mean: "你擁有創造一切的力量，現在是行動的時刻。", color: "#E1BEE7", cName: "薰衣草紫", item: "精緻的筆" },
-        { type: "塔羅牌", name: "II 女祭司", mean: "靜下心來，你的直覺會告訴你答案。", color: "#BBDEFB", cName: "月光藍", item: "珍珠髮夾或耳環" },
-        { type: "神諭卡", name: "深呼吸", mean: "當前的事情不需要急著決定，先給自己三次深呼吸的時間。", color: "#C8E6C9", cName: "薄荷綠", item: "草本茶或護手霜" },
-        { type: "神諭卡", name: "內在小孩", mean: "去吃一點小時候喜歡吃的零食，找回那份單純的快樂。", color: "#FFCCBC", cName: "珊瑚橘", item: "糖果或卡通圖案小物" }
+        { name: "權杖九", mean: "最後防線，保持警覺心。", color: "#90A4AE" },
+        { name: "權杖十", mean: "負擔過重，該找時間休息了。", color: "#795548" },
+        { name: "權杖侍者", mean: "好奇的消息，開始新學習。", color: "#FFECB3" },
+        { name: "權杖騎士", mean: "勇敢追尋夢想，行動果敢。", color: "#FF9800" },
+        { name: "權杖皇后", mean: "散發自信光芒，富有感染力。", color: "#FFB300" },
+        { name: "權杖國王", mean: "成熟的領導，展現遠大抱負。", color: "#F57C00" },
+        { name: "聖杯一", mean: "情感新契機，內心喜悅湧現。", color: "#E1F5FE" },
+        { name: "聖杯二", mean: "情感和諧，建立深厚的默契。", color: "#FCE4EC" },
+        { name: "聖杯三", mean: "友誼聚會，分享快樂的時光。", color: "#F8BBD0" },
+        { name: "聖杯四", mean: "內省時刻，對現狀感到沉思。", color: "#B3E5FC" },
+        { name: "聖杯五", mean: "悲傷後仍有希望，看向未來。", color: "#CFD8DC" },
+        { name: "聖杯六", mean: "溫馨的回憶，收到純真驚喜。", color: "#FFF9C4" },
+        { name: "聖杯七", mean: "夢想眾多，需要釐清真實需求。", color: "#E1BEE7" },
+        { name: "聖杯八", mean: "追尋更高理想，毅然離去。", color: "#1A237E" },
+        { name: "聖杯九", mean: "願望成真，內心感到極大滿足。", color: "#FFF176" },
+        { name: "聖杯十", mean: "情感圓滿，享受家庭的和諧。", color: "#E8F5E9" },
+        { name: "聖杯侍者", mean: "感性的好消息，發揮想像力。", color: "#F3E5F5" },
+        { name: "聖杯騎士", mean: "浪漫的消息，追求心中的理想。", color: "#CE93D8" },
+        { name: "聖杯皇后", mean: "溫柔慈悲，充滿包容的愛。", color: "#81D4FA" },
+        { name: "聖杯國王", mean: "情緒成熟穩定，包容所有可能。", color: "#0288D1" },
+        { name: "寶劍一", mean: "理智清晰，獲得新的思維突破。", color: "#E0F7FA" },
+        { name: "寶劍二", mean: "面臨選擇，需要冷靜找尋平衡。", color: "#ECEFF1" },
+        { name: "寶劍三", mean: "情感傷痛，正是清理與療癒之時。", color: "#B0BEC5" },
+        { name: "寶劍四", mean: "靜養充電，暫時放下忙碌。", color: "#F5F5F5" },
+        { name: "寶劍五", mean: "衝突與爭執，應避開無謂競爭。", color: "#607D8B" },
+        { name: "寶劍六", mean: "渡過難關，正往平靜的方向去。", color: "#B2EBF2" },
+        { name: "寶劍七", mean: "運用智慧，採取靈活策略。", color: "#80DEEA" },
+        { name: "寶劍八", mean: "打破自我設限，你看得見出口。", color: "#78909C" },
+        { name: "寶劍九", mean: "壓力較大，別讓擔憂控制了你。", color: "#263238" },
+        { name: "寶劍十", mean: "觸底反彈，最糟的已經過去。", color: "#37474F" },
+        { name: "寶劍侍者", mean: "警覺的消息，保持好奇與機敏。", color: "#E1F5FE" },
+        { name: "寶劍騎士", mean: "勇往直前，迅速解決問題。", color: "#4FC3F7" },
+        { name: "寶劍皇后", mean: "獨立冷靜，做出明智的判斷。", color: "#B0C4DE" },
+        { name: "寶劍國王", mean: "具備專業判斷力，展現威信。", color: "#455A64" },
+        { name: "錢幣一", mean: "財運契機，物質豐饒的新起點。", color: "#FFF9C4" },
+        { name: "錢幣二", mean: "靈活應對，在變動中找平衡。", color: "#C8E6C9" },
+        { name: "錢幣三", mean: "展現專業，與團隊合作愉快。", color: "#D7CCC8" },
+        { name: "錢幣四", mean: "守住成果，但別忘了保持彈性。", color: "#A1887F" },
+        { name: "錢幣五", mean: "困境中互助，溫暖一直在身邊。", color: "#BDBDBD" },
+        { name: "錢幣六", mean: "施與受的和諧，慷慨帶來好運。", color: "#FFECB3" },
+        { name: "錢幣七", mean: "耐心等待成果，評估下一步。", color: "#DCEDC8" },
+        { name: "錢幣八", mean: "專注細節，磨練技能會大成。", color: "#8D6E63" },
+        { name: "錢幣九", mean: "獨立自主，享受優質的生活。", color: "#FBC02D" },
+        { name: "錢幣十", mean: "長久穩定，共享家族的榮耀。", color: "#F9A825" },
+        { name: "錢幣侍者", mean: "務實的訊息，開始新的投資。", color: "#F0F4C3" },
+        { name: "錢幣騎士", mean: "腳踏實地，穩重完成任務。", color: "#689F38" },
+        { name: "錢幣皇后", mean: "溫柔照顧身邊人，生活富足。", color: "#81C784" },
+        { name: "錢幣國王", mean: "事業有成，擁有穩固的基礎。", color: "#33691E" }
     ];
-
-    function draw() {
-        const card = deck[Math.floor(Math.random() * deck.length)];
-        document.getElementById('card-type').innerText = card.type;
-        document.getElementById('card-name').innerText = card.name;
-        document.getElementById('card-meaning').innerText = card.mean;
-        document.getElementById('l-color').innerText = card.cName;
-        document.getElementById('l-item').innerText = card.item;
-        document.getElementById('l-dot').style.backgroundColor = card.color;
-        document.body.style.backgroundColor = card.color;
-        document.getElementById('lucky-info').style.display = 'block';
+    const positions = {
+        "1": ["指引："],
+        "3": ["過去 (Past)：", "現在 (Present)：", "未來 (Future)："],
+        "4": ["風之元素 (思維)：", "火之元素 (行動)：", "水之元素 (情緒)：", "土之元素 (物質)："],
+        "5": ["問題核心：", "外在干擾：", "潛在機會：", "過去基礎：", "最終導向："]
+    };
+    function drawTarot() {
+        const count = document.getElementById('spread').value;
+        const resultArea = document.getElementById('result-list');
+        resultArea.innerHTML = "";
+        let shuffled = [...tarotDeck].sort(() => 0.5 - Math.random());
+        let selected = shuffled.slice(0, parseInt(count));
+        let posLabels = positions[count];
+        selected.forEach((card, i) => {
+            let item = document.createElement('div');
+            item.className = "tarot-item";
+            item.innerHTML = `<span class="pos-label">${posLabels[i]}</span><span class="tarot-name">${card.name}</span><span class="tarot-mean">${card.mean}</span>`;
+            resultArea.appendChild(item);
+        });
+        document.body.style.backgroundColor = selected[0].color;
     }
 </script>
 </body>
