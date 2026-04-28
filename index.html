@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haru 的靈魂占卜室</title>
+    <style>
+        :root { --main-bg: #f4f4f9; }
+        body { font-family: 'PingFang TC', sans-serif; background-color: var(--main-bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; transition: background 0.8s ease; }
+        .card { background: white; padding: 2rem; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 400px; }
+        h1 { color: #444; font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .type-tag { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .result { margin: 20px 0; min-height: 120px; }
+        .lucky-box { background: #fafafa; border-radius: 15px; padding: 15px; margin-top: 20px; text-align: left; font-size: 0.9rem; }
+        .color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-left: 5px; border: 1px solid #ddd; }
+        button { background: #333; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1rem; cursor: pointer; transition: transform 0.2s; width: 100%; margin-top: 10px; }
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="type-tag" id="card-type">Daily Guidance</div>
+    <h1 id="card-name">準備好接收啟示了嗎？</h1>
+    <div class="result">
+        <p id="card-meaning">點擊下方按鈕，抽取今日的塔羅與神諭指引</p>
+    </div>
+    
+    <div id="lucky-info" style="display:none;">
+        <div class="lucky-box">
+            <div>🎨 幸運色：<span id="l-color"></span><span id="l-dot" class="color-dot"></span></div>
+            <div style="margin-top:8px;">🎁 幸運小物：<span id="l-item"></span></div>
+        </div>
+    </div>
+
+    <button onclick="draw()">抽取今日卡牌</button>
+</div>
+
+<script>
+    const deck = [
+        { type: "塔羅牌", name: "0 愚者", mean: "開始一段未知的旅程，保持純真與勇氣。", color: "#FFF176", cName: "檸檬黃", item: "亮色系短襪" },
+        { type: "塔羅牌", name: "I 魔術師", mean: "你擁有創造一切的力量，現在是行動的時刻。", color: "#E1BEE7", cName: "薰衣草紫", item: "精緻的筆" },
+        { type: "塔羅牌", name: "II 女祭司", mean: "靜下心來，你的直覺會告訴你答案。", color: "#BBDEFB", cName: "月光藍", item: "珍珠髮夾或耳環" },
+        { type: "神諭卡", name: "深呼吸", mean: "當前的事情不需要急著決定，先給自己三次深呼吸的時間。", color: "#C8E6C9", cName: "薄荷綠", item: "草本茶或護手霜" },
+        { type: "神諭卡", name: "內在小孩", mean: "去吃一點小時候喜歡吃的零食，找回那份單純的快樂。", color: "#FFCCBC", cName: "珊瑚橘", item: "糖果或卡通圖案小物" }
+    ];
+
+    function draw() {
+        const card = deck[Math.floor(Math.random() * deck.length)];
+        document.getElementById('card-type').innerText = card.type;
+        document.getElementById('card-name').innerText = card.name;
+        document.getElementById('card-meaning').innerText = card.mean;
+        document.getElementById('l-color').innerText = card.cName;
+        document.getElementById('l-item').innerText = card.item;
+        document.getElementById('l-dot').style.backgroundColor = card.color;
+        document.body.style.backgroundColor = card.color;
+        document.getElementById('lucky-info').style.display = 'block';
+    }
+</script>
+</body>
+</html>
