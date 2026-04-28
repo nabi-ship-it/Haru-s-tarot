@@ -6,34 +6,74 @@
     <title>Haru 的靈魂占卜室</title>
     <style>
         :root { --main-bg: #f4f4f9; }
-        body { font-family: 'PingFang TC', sans-serif; background-color: var(--main-bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; transition: background 0.8s ease; }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background-color: var(--main-bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; transition: background 0.8s ease; }
         .card { background: white; padding: 2rem; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 400px; }
-        h1 { color: #444; font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .type-tag { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        .result { margin: 20px 0; min-height: 120px; }
-        .lucky-box { background: #fafafa; border-radius: 15px; padding: 15px; margin-top: 20px; text-align: left; font-size: 0.9rem; }
-        .color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-left: 5px; border: 1px solid #ddd; }
-        button { background: #333; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1rem; cursor: pointer; transition: transform 0.2s; width: 100%; margin-top: 10px; }
+        .type-tag { font-size: 0.8rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        h1 { color: #444; font-size: 1.6rem; margin: 10px 0; min-height: 1.6rem; }
+        .result-area { margin: 20px 0; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
+        #meaning { color: #666; line-height: 1.6; font-size: 1rem; }
+        .lucky-display { background: #fafafa; border-radius: 15px; padding: 15px; margin-top: 15px; display: none; text-align: left; }
+        .color-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-left: 8px; border: 1px solid #ddd; vertical-align: middle; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        button { background: #333; color: white; border: none; padding: 12px 5px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
         button:active { transform: scale(0.95); }
+        .btn-lucky { background: #607d8b; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="type-tag" id="card-type">Daily Guidance</div>
-    <h1 id="card-name">準備好接收啟示了嗎？</h1>
-    <div class="result">
-        <p id="card-meaning">點擊下方按鈕，抽取今日的塔羅與神諭指引</p>
-    </div>
+    <div id="tag" class="type-tag">Welcome</div>
+    <h1 id="title">今日指引</h1>
     
-    <div id="lucky-info" style="display:none;">
-        <div class="lucky-box">
-            <div>🎨 幸運色：<span id="l-color"></span><span id="l-dot" class="color-dot"></span></div>
-            <div style="margin-top:8px;">🎁 幸運小物：<span id="l-item"></span></div>
-        </div>
+    <div class="result-area">
+        <p id="meaning">想看看今天的運勢嗎？<br>選一個按鈕開始抽卡吧！</p>
     </div>
 
-    <button onclick="draw()">抽取今日卡牌</button>
+    <div id="lucky-area" class="lucky-display">
+        <div style="margin-bottom: 8px;">🎨 幸運色：<span id="c-name"></span><span id="c-dot" class="color-dot"></span></div>
+        <div>🎁 幸運小物：<span id="item-name"></span></div>
+    </div>
+
+    <div class="btn-group">
+        <button onclick="drawTarot()">抽塔羅牌</button>
+        <button class="btn-lucky" onclick="drawLucky()">抽幸運物</button>
+    </div>
+</div>
+
+<script>
+    const tarotDeck = [
+        { name: "0 愚者", mean: "新的冒險與開始，保持純真與勇氣。", color: "#FFF9C4" },
+        { name: "I 魔術師", mean: "展現才華，萬事具備，發揮創意。", color: "#E1BEE7" },
+        { name: "II 女祭司", mean: "直覺敏銳，內在智慧，靜觀其變。", color: "#C5CAE9" },
+        { name: "III 皇后", mean: "生活富足豐盛，感受愛與美。", color: "#F8BBD0" },
+        { name: "IV 皇帝", mean: "權威穩定，建立秩序與掌控。", color: "#FFCCBC" },
+        { name: "V 教皇", mean: "尋求指引，遵循傳統智慧與規範。", color: "#D7CCC8" },
+        { name: "VI 戀人", mean: "美好的選擇，情感的和諧聯繫。", color: "#FCE4EC" },
+        { name: "VII 戰車", mean: "意志堅定，克服障礙邁向勝利。", color: "#CFD8DC" },
+        { name: "VIII 力量", mean: "溫柔的力量能戰勝內心的恐懼。", color: "#FFE082" },
+        { name: "IX 隱士", mean: "退回內心，尋找自我的真理。", color: "#EEEEEE" },
+        { name: "X 命運之輪", mean: "時來運轉，新的契機即將出現。", color: "#FFD700" },
+        { name: "XI 正義", mean: "公平誠實，做出理性的決定。", color: "#C8E6C9" },
+        { name: "XII 倒吊人", mean: "換個角度思考，現在需要等待。", color: "#B3E5FC" },
+        { name: "XIII 死亡", mean: "舊的結束，即將迎來新的蛻變。", color: "#BDBDBD" },
+        { name: "XIV 節制", mean: "尋求平衡，融合不同的可能性。", color: "#E0F2F1" },
+        { name: "XV 魔鬼", mean: "覺察慾望，打破自我束縛的枷鎖。", color: "#A1887F" },
+        { name: "XVI 高塔", mean: "震撼的改變，摧毀後的重生。", color: "#FFAB91" },
+        { name: "XVII 星星", mean: "希望不滅，平靜與心靈的療癒。", color: "#81D4FA" },
+        { name: "XVIII 月亮", mean: "探索不安，潛意識的夢境指引。", color: "#9575CD" },
+        { name: "XIX 太陽", mean: "光明燦爛，充滿喜悅與活力。", color: "#FFB74D" },
+        { name: "XX 審判", mean: "覺醒的時刻，做出關鍵的召喚。", color: "#FFF59D" },
+        { name: "XXI 世界", mean: "圓滿達成，生命旅程的里程碑。", color: "#D1C4E9" },
+        { name: "權杖一", mean: "熱情的新計畫，行動力滿點。", color: "#FFCC80" },
+        { name: "權杖二", mean: "規劃未來，跨出舒適圈去探索。", color: "#FFE0B2" },
+        { name: "權杖三", mean: "展望遠方，合作與擴展的機會。", color: "#FFB74D" },
+        { name: "權杖四", mean: "歡慶成功，獲得穩定的喜悅。", color: "#FFF176" },
+        { name: "權杖五", mean: "混亂與競爭，需要耐心應對。", color: "#FF8A65" },
+        { name: "權杖六", mean: "獲得勝利與榮耀，受人愛戴。", color: "#FFD54F" },
+        { name: "權杖七", mean: "堅持立場，捍衛自己的成果。", color: "#A1887F" },
+        { name: "權杖八", mean: "訊息傳遞快速，進展神速。", color: "#81D4FA" },
+        { name: "
 </div>
 
 <script>
